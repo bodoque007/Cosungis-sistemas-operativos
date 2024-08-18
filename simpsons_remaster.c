@@ -39,6 +39,7 @@ int main(int argc, char const *argv[]) {
                     write(1, "Maggie\n", 8);
                     exit(EXIT_SUCCESS);
                 }
+                write(1, "Lisa\n", 6);
             }
         }
     } else {
