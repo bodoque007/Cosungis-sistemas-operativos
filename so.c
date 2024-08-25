@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
         if (result == 0) {
             printf("Hijo con pid %d es ganador!\n", process);
             kill(process, SIGKILL);
+            // Clean up
+            waitpid(process, &status, 0);
         }
     }
     return 0;
