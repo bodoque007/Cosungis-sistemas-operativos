@@ -24,8 +24,8 @@ void child_read_and_receive(pid_t parent) {
 }
 
 int main() {
-    pid_t pid = fork();
     pid_t parent = getpid();
+    pid_t pid = fork();
     if (pid == 0) {
         // getpid() is parent'
         while(1) child_read_and_receive(parent);
