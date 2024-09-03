@@ -16,8 +16,6 @@ void handlerSIGTERM() {
     if (r == j_global) {
         printf("Goodbye, %d dying \n", getpid());
         exit(0);
-    } else {
-        return;
     }
 }
 
@@ -36,6 +34,7 @@ int main(int argc, char *argv[]) {
         if (pid == 0) {
             signal(SIGTERM, handlerSIGTERM);
             while(1) {
+                pause();
             }
         } else {
             pids[i] = pid;
@@ -57,8 +56,9 @@ int main(int argc, char *argv[]) {
         if (result == 0) {
             printf("Hijo con pid esta vivo: %d\n", process);
             kill(process, SIGKILL);
-            waitpid(process, &status, 0);
         }
+        // Clean up a todos.
+        waitpid(process, &status, 0);
     }
     return 0;
 }
