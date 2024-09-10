@@ -8,7 +8,6 @@
 #define READ_END 0
 #define WRITE_END 1
 
-// Structure to hold the value and game status
 typedef struct {
     int value;
     int game_over;
@@ -21,7 +20,6 @@ int generate_random_number(){
 int main(int argc, char **argv) {
     srand(time(NULL));
     
-    // Variables
     int status, n, start, mensajeInicial, random;
     n = atoi(argv[1]);
     mensajeInicial = atoi(argv[2]);
@@ -34,7 +32,6 @@ int main(int argc, char **argv) {
     
     printf("Se crearán %i procesos, se enviará el caracter %i desde proceso %i \n", n, mensajeInicial, start);
     
-    // Creating pipes
     int fd[n][2];
     for (int i = 0; i < n; i++) {
         pipe(fd[i]);
@@ -48,7 +45,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n; i++) {
         children[i] = fork();
-        if (children[i] == 0) {  // Child process
+        if (children[i] == 0) { 
             if (i == start) {
                 close(fdPadreHijo[WRITE_END]);
                 close(fdHijoPadre[READ_END]);
@@ -106,15 +103,12 @@ int main(int argc, char **argv) {
     close(fdPadreHijo[READ_END]);
     close(fdHijoPadre[WRITE_END]);
 
-    // Initial message from parent to first child
     Message msg = {mensajeInicial, 0};
     write(fdPadreHijo[WRITE_END], &msg, sizeof(msg));
 
-    // Parent waits for the final value from a child
     read(fdHijoPadre[READ_END], &msg, sizeof(msg));
     printf("El valor final es %d\n", msg.value);
 
-    // Closing pipes and waiting for children
     for (int i = 0; i < n; i++) {
         close(fd[i][READ_END]);
         close(fd[i][WRITE_END]);
