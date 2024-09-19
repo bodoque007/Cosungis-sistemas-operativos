@@ -1,43 +1,34 @@
-heladeraActual = 0;
+N = cantidadHeladeras;
 puertaHeladera = sem(1);
-heladeraRestante[N][2] //all initialized to [15, 10]. 
-mutexHeladeraRestante = sem(1)
+turnoHeladera[N] = [sem(0) for _ in range(N)]
+turnoHeladera[0].signal();
+permisoEnvase[2] = [(sem(0), sem(0))]
 
-// tipoEnvase = 0 means bottles and tipoEnvase = 1 means "porrones" (which is kind of a glass)
 cerveza(i, tipoEnvase) {
   llegarABar();
-
-  mutex.wait();
-  
-  if (heladeraRestante[heladeraActual][tipoEnvase] <= 0) {
-    return;
-  }
-
+  permisoEnvase[tipoEnvase].wait();
   puertaHeladera.wait();
   
-  heladeraRestante[heladeraActual][tipoEnvase]--;
-  mutex.signal();
   MeMetenEnHeladera();
   yaMeti.signal();
 }
 
 
 heladera(i) {
+  turnoHeladera[i].wait();
+  permisoEnvase[0].signal(15);
+  permisoENvase[1].signal(10);
   EnchufarHeladera();
-  while (true) {
+  restantes = 25;
+  while (restantes > 0) {
     AbrirHeladera();
     puertaHeladera.signal();
 
     yaMeti.wait();
     cerrarHeladera();
-    mutex.wait() 
-    if (heladeraRestante[heladeraActual][0] == 0 && heladeraRestante[heladeraActual][1] == 0) {
-      break;
-    }
-    mutex.signal();
+    restantes--;
   }
   enfrioRapido();
-  mutex.wait();
-  heladeraActual++;
-  mutex.signal();
+  if (i != N - 1) turnoHeladera[i + 1].signal();
+  return 0;
 }
