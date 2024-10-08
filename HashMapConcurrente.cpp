@@ -19,29 +19,50 @@ unsigned int HashMapConcurrente::hashIndex(std::string clave) {
 
 void HashMapConcurrente::incrementar(std::string clave) {
     // Completar (Ejercicio 2)
-    unsigned int hashIndex = HashMapConcurrente::hashIndex(clave);
-    std::unique_lock<std::mutex> lock(locks[index]);
-    auto it = tabla[index]->begin();
-    // Iteramos hasta encontrar la clave o llegar al final
-    while (it != tabla[index]->end() && it->first != clave) {
-        it++;
+    bool found = false;
+    unsigned int index = hashIndex(clave);
+    // Lockeamos el bucket correspondiente, unique_lock porque es el lock de los writers. (Solo puede haber un writer a la vez)
+    std::unique_lock<std::shared_mutex> lock(locks[index]);
+
+    for (auto& p : *tabla[index]) {
+        if (p.first == clave) {
+            p.second++;
+            found = true;
+            break;
+        }
     }
     // Si llegamos al final, es porque la clave no estaba. Insertamos la clave con su valor de 1 aparicion
-    if (it == tabla[index]->end()) {
-        tabla[index]->push_back({clave, 1});
-    } else {
-        // Si la clave ya estaba, incrementamos su valor y ya esta
-        it->second++;
+    if (!found) {
+        hashMapPair nuevoPar = std::make_pair(clave, 1);
+        tabla[index]->insertar(nuevoPar);
     }
-    // No es necesario soltar el lock, pues el destructor de unique_lock lo hace por nosotros al salir del scope
 }
 
 std::vector<std::string> HashMapConcurrente::claves() {
     // Completar (Ejercicio 2)
+    std::vector<std::string> claves;
+    for (unsigned int index = 0; index < HashMapConcurrente::cantLetras; index++) {
+        // Lockeamos el shared lock del bucket porque es el lock de los readers. (Muchos pueden leer al mismo tiempo)
+        std::shared_lock<std::shared_mutex> lock(locks[index]);
+        for (const auto& p : *tabla[index]) {
+            claves.push_back(p.first);
+        }
+    }
+    return claves;
 }
 
 unsigned int HashMapConcurrente::valor(std::string clave) {
     // Completar (Ejercicio 2)
+    unsigned int index = hashIndex(clave);
+    // Lockeamos el shared lock del bucket porque es el lock de los readers. (Muchos pueden leer al mismo tiempo)
+    std::shared_lock<std::shared_mutex> lock(locks[index]);
+
+    for (const auto& p : *tabla[index]) {
+        if (p.first == clave) {
+            return p.second;
+        }
+    }
+    return 0;
 }
 
 float HashMapConcurrente::promedio() {
@@ -59,4 +80,7 @@ float HashMapConcurrente::promedio() {
     }
     return 0;        
 }
+
+
+
 #endif

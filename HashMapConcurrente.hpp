@@ -1,11 +1,12 @@
 #ifndef HMC_HPP
 #define HMC_HPP
 
-#include <mutex>
+#include <shared_mutex>
 #include <array>
 #include <atomic>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "ListaAtomica.hpp"
 
@@ -26,8 +27,9 @@ class HashMapConcurrente {
 
  private:
     ListaAtomica<hashMapPair> *tabla[HashMapConcurrente::cantLetras];
-    std::mutex locks[cantLetras];
+
     static unsigned int hashIndex(std::string clave);
+    std::shared_mutex locks[cantLetras];
 };
 
 #endif  /* HMC_HPP */
